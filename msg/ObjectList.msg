@@ -1,3 +1,3 @@
 std_msgs/Header header
 
-MultiObjectTracker/Object[] objects
+multi_object_tracker/Object[] objects

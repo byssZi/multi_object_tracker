@@ -9,7 +9,7 @@ BoundingBoxVisualizer::BoundingBoxVisualizer() {
 }
 BoundingBoxVisualizer::~BoundingBoxVisualizer() {}
 
-void BoundingBoxVisualizer::fusion_callback(const MultiObjectTracker::PredictionObstacles::ConstPtr &fusion_objects){
+void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::PredictionObstacles::ConstPtr &fusion_objects){
     visualization_msgs::MarkerArray marker_array;
     visualization_msgs::MarkerArray id_array;
     visualization_msgs::MarkerArray trajectory_array;

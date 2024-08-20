@@ -26,10 +26,10 @@ void fusion::run(){
     radar_sub = nh_.subscribe("/ars_40X/combined_objects", 1, &fusion::radar_callback, this);
     odom_sub = nh_.subscribe("/odomData", 1, &fusion::odom_callback, this);
     timer_ = nh_.createTimer(ros::Duration(0.1), &fusion::timerCallback, this);
-    fusion_pub = nh_.advertise<MultiObjectTracker::PredictionObstacles>("/MultiObjectTracker",1);
+    fusion_pub = nh_.advertise<multi_object_tracker::PredictionObstacles>("/MultiObjectTracker",1);
 }
 
-void fusion::odom_callback(const MultiObjectTracker::Localization::ConstPtr &odom){
+void fusion::odom_callback(const multi_object_tracker::Localization::ConstPtr &odom){
 
     Eigen::Quaterniond q;
     q.w() = odom->location.pose.pose.orientation.w;
@@ -64,7 +64,7 @@ void fusion::odom_callback(const MultiObjectTracker::Localization::ConstPtr &odo
 }
 
 void fusion::timerCallback(const ros::TimerEvent& event){
-    MultiObjectTracker::PredictionObstacles tracker_objects;
+    multi_object_tracker::PredictionObstacles tracker_objects;
     tracker_objects.timestamp = timestamp;
     tracker_objects.vehicle_position.x = vehicle_x;
     tracker_objects.vehicle_position.y = vehicle_y;
@@ -77,7 +77,7 @@ void fusion::timerCallback(const ros::TimerEvent& event){
     for(auto object : tracker.tracks_)
     {
         if(object.is_pub){
-            MultiObjectTracker::PredictionObstacle pub_;
+            multi_object_tracker::PredictionObstacle pub_;
             pub_.is_static = 0;
             pub_.perception_obstacle.header.frame_id = 'rslidar';
             pub_.perception_obstacle.header.stamp = ros::Time::now();
@@ -112,7 +112,7 @@ void fusion::timerCallback(const ros::TimerEvent& event){
                     pub_.perception_obstacle.polygon.points.push_back(point);
                 }
             }
-            MultiObjectTracker::TrajectoryPoint pre_point;
+            multi_object_tracker::TrajectoryPoint pre_point;
             double px = object.ukf.x_(0);
             double py = object.ukf.x_(1);
             double v = object.ukf.x_(2);
@@ -137,7 +137,7 @@ void fusion::timerCallback(const ros::TimerEvent& event){
     fusion_pub.publish(tracker_objects);
 }
 
-void fusion::lidar_callback(const MultiObjectTracker::DetectedObjectArray::ConstPtr &lidar_objects){
+void fusion::lidar_callback(const multi_object_tracker::DetectedObjectArray::ConstPtr &lidar_objects){
     std::lock_guard<std::mutex> lock(msgs_mutex);
     timestamp = lidar_objects->header.stamp.toSec();
     vector<BoundingBox3D> lidar_detections;
@@ -228,7 +228,7 @@ void fusion::lidar_callback(const MultiObjectTracker::DetectedObjectArray::Const
 } 
 
 
-void fusion::radar_callback (const MultiObjectTracker::ObjectList::ConstPtr &radar_objects){
+void fusion::radar_callback (const multi_object_tracker::ObjectList::ConstPtr &radar_objects){
     std::lock_guard<std::mutex> lock(msgs_mutex);
     vector<BoundingBox3D> radar_detections;
     if(radar_objects->objects.empty()) return;

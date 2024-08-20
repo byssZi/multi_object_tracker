@@ -1,8 +1,8 @@
 <launch>
 
-  <node pkg="MultiObjectTracker" type="MultiObjectTracker_node" name="Tracker" output="screen">
+  <node pkg="multi_object_tracker" type="multi_object_tracker_node" name="tracker" output="screen">
   </node>
-  <node pkg="MultiObjectTracker" type="visualize_boundingbox_node" name="visualize" output="screen">
+  <node pkg="multi_object_tracker" type="visualize_boundingbox_node" name="visualize" output="screen">
   </node>
 
 </launch>

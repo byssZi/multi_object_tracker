@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(MultiObjectTracker)
+project(multi_object_tracker)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,7 +8,6 @@ project(MultiObjectTracker)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
   geometry_msgs
   message_generation
   nav_msgs
@@ -18,13 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   visualization_msgs
 )
-find_package(Protobuf REQUIRED)
-if(PROTOBUF_FOUND)
-    message(STATUS "protobuf library found")
-else()
-    message(FATAL_ERROR "protobuf library is needed but cant be found")
-endif()
-find_package(OpenCV REQUIRED)
+
 find_package(Eigen3 REQUIRED)
 find_package(catkin REQUIRED COMPONENTS ${PACKAGE_DEPENDENCIES})
 ## System dependencies are found with CMake's conventions
@@ -152,17 +145,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-include ${CMAKE_SOURCE_DIR}/include/MultiObjectTracker
+include ${CMAKE_SOURCE_DIR}/include/multi_object_tracker
   ${EIGEN3_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${PROTOBUF_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
 )
 
 link_directories(
   include
-  ${PCL_LIBRARY_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
 ## Declare a C++ library
@@ -194,7 +183,7 @@ link_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-add_executable(MultiObjectTracker_node
+add_executable(multi_object_tracker_node
 		src/main.cpp
 		src/ros1_pub.cpp
 		src/Hungarian.cpp
@@ -202,8 +191,8 @@ add_executable(MultiObjectTracker_node
 		src/objecttracker.cpp
 		src/tools.cpp
 		src/ukf.cpp)
-target_link_libraries(MultiObjectTracker_node ${catkin_LIBRARIES} ${PROTOBUF_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(MultiObjectTracker_node ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(multi_object_tracker_node ${catkin_LIBRARIES} ${PROTOBUF_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(multi_object_tracker_node ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(visualize_boundingbox_node src/visualize_boundingbox.cpp)
 target_link_libraries(visualize_boundingbox_node

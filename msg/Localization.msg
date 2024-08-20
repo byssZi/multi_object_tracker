@@ -8,4 +8,4 @@ nav_msgs/Odometry location
 bool is_valid
 
 #定位定向设备原始数据
-MultiObjectTracker/Ins original_ins
+multi_object_tracker/Ins original_ins

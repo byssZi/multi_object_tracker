@@ -6,20 +6,20 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Point.h>
 #include <Eigen/Geometry>
-#include "MultiObjectTracker/PredictionObstacles.h"
-#include "MultiObjectTracker/PredictionObstacle.h"
-#include "MultiObjectTracker/PerceptionObstacle.h"
-#include "MultiObjectTracker/TrajectoryPoint.h"
-#include "MultiObjectTracker/DetectedObjectArray.h"
-#include "MultiObjectTracker/ObjectList.h"
+#include "multi_object_tracker/PredictionObstacles.h"
+#include "multi_object_tracker/PredictionObstacle.h"
+#include "multi_object_tracker/PerceptionObstacle.h"
+#include "multi_object_tracker/TrajectoryPoint.h"
+#include "multi_object_tracker/DetectedObjectArray.h"
+#include "multi_object_tracker/ObjectList.h"
 #include <visualization_msgs/MarkerArray.h>
 #include "objecttracker.h"
 #include <queue>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "MultiObjectTracker/Localization.h"
-#include "MultiObjectTracker/Ins.h"
+#include "multi_object_tracker/Localization.h"
+#include "multi_object_tracker/Ins.h"
 #include <time.h>
 
 enum {
@@ -62,9 +62,9 @@ class fusion{
     Eigen::Quaterniond car_orientation;//转换姿态
 
 
-    void lidar_callback (const MultiObjectTracker::DetectedObjectArray::ConstPtr &lidar_objects);
-    void radar_callback (const MultiObjectTracker::ObjectList::ConstPtr &radar_objects);
-    void odom_callback (const MultiObjectTracker::Localization::ConstPtr &odom);
+    void lidar_callback (const multi_object_tracker::DetectedObjectArray::ConstPtr &lidar_objects);
+    void radar_callback (const multi_object_tracker::ObjectList::ConstPtr &radar_objects);
+    void odom_callback (const multi_object_tracker::Localization::ConstPtr &odom);
     void timerCallback(const ros::TimerEvent& event);
     std::mutex msgs_mutex;
 

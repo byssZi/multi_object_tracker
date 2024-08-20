@@ -15,7 +15,7 @@ public:
     BoundingBoxVisualizer();
     ~BoundingBoxVisualizer(); 
 
-    void fusion_callback(const MultiObjectTracker::PredictionObstacles::ConstPtr &fusion_objects);
+    void fusion_callback(const multi_object_tracker::PredictionObstacles::ConstPtr &fusion_objects);
 
 private:
     ros::NodeHandle nh;
