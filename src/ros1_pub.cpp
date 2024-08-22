@@ -13,8 +13,9 @@ fusion::fusion() : stop_thread(false){
     vehicle_x = 0;
     vehicle_y = 0;
     vehicle_z = 0;
-    vehicle_yaw = 0;
     vehicle_v = 0;
+    vehicle_velocity_x = 0;
+    vehicle_velocity_y = 0;
 }
 
 fusion::~fusion() {
@@ -32,35 +33,33 @@ void fusion::run(){
 void fusion::odom_callback(const multi_object_tracker::Localization::ConstPtr &odom){
 
     Eigen::Quaterniond q;
-    q.w() = odom->location.pose.pose.orientation.w;
+    q.w() = odom->location.pose.pose.orientation.w;//右前上变换到UTM
     q.x() = odom->location.pose.pose.orientation.x;
     q.y() = odom->location.pose.pose.orientation.y;
     q.z() = odom->location.pose.pose.orientation.z;
     q.normalize();
     Eigen::Matrix3d rotation_matrix(q);
 
-    transform_matrix(0, 3) = odom->location.pose.pose.position.x;
+    transform_matrix(0, 3) = odom->location.pose.pose.position.x;//右前上变换到UTM
     transform_matrix(1, 3) = odom->location.pose.pose.position.y;
     transform_matrix(2, 3) = 0;
     transform_matrix.block<3, 3>(0, 0) = rotation_matrix;
 
     car_orientation = q;
-    car_orientation.normalize();
 
-    Eigen::Vector3d eulerAngle = q.matrix().eulerAngles(2,1,0);
     vehicle_x = odom->location.pose.pose.position.x;
     vehicle_y = odom->location.pose.pose.position.y;
     vehicle_z = 0;
-    vehicle_yaw = eulerAngle[0];
-    vehicle_v = odom->original_ins.ground_speed/3.6;
+    vehicle_v = odom->original_ins.ground_speed;
 
-    double vehicle_velocity_x = -vehicle_v * sin(vehicle_yaw);//坐标系右前上
-    double vehicle_velocity_y = vehicle_v * cos(vehicle_yaw);
+    vehicle_velocity_x = odom->original_ins.east_speed;//这里是utm下的东向速度了
+    vehicle_velocity_y = odom->original_ins.north_speed; //这里是utm下的北向速度了
 
     transform_velocity(0, 3) = vehicle_velocity_x;
     transform_velocity(1, 3) = vehicle_velocity_y;
     transform_velocity(2, 3) = 0;
     transform_velocity.block<3, 3>(0, 0) = rotation_matrix;
+
 }
 
 void fusion::timerCallback(const ros::TimerEvent& event){
@@ -286,7 +285,7 @@ void fusion::process_data(const std::vector<BoundingBox3D> object_boxes) {
         tracker.ProcessMeasurement(object_boxes);
         endTime=clock();				// 结束时刻
         cout<<"Track time is: "<<(endTime-startTime)*1.0/CLOCKS_PER_SEC<<" s"<<endl;
-        if((endTime-startTime)*1.0/CLOCKS_PER_SEC > 0.2){ //防止卡死
+        if((endTime-startTime)*1.0/CLOCKS_PER_SEC > 0.1){ //防止卡死
             tracker.tracks_.clear();
         }
         stop_thread = false;

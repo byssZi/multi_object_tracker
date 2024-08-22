@@ -154,7 +154,7 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
         for (size_t i = 0; i < tracks.size(); ++i) {
             if (!track_matched[i]) { //!track_matched[i]表示tracks[i]没匹配上
                 tracks[i].missed_count++;
-                if (tracks[i].missed_count < max_missed_count_) {
+/*                 if (tracks[i].missed_count < max_missed_count_) {
                     switch(tracks[i].Box.sensor)
                     {
                         case BoundingBox3D::LIDAR:
@@ -193,7 +193,7 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
                             break;
                         }
                     }
-                }
+                } */
             }
         }
     }

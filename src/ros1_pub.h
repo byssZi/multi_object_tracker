@@ -75,8 +75,9 @@ class fusion{
     double vehicle_x;
     double vehicle_y;
     double vehicle_z;
-    double vehicle_yaw;
     double vehicle_v;
+    double vehicle_velocity_x;
+    double vehicle_velocity_y;
 
 
     public:
