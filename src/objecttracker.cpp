@@ -1,6 +1,6 @@
 #include "objecttracker.h"
 
-ObjectTracker::ObjectTracker() : distance_threshold_(3), max_missed_count_(10), min_birth_count_(2) {}
+ObjectTracker::ObjectTracker() : distance_threshold_(5), max_missed_count_(8), min_birth_count_(2) {}
 
 void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) { 
     vector<Track> tracks(tracks_);

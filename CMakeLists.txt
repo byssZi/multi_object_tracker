@@ -191,7 +191,7 @@ add_executable(multi_object_tracker_node
 		src/objecttracker.cpp
 		src/tools.cpp
 		src/ukf.cpp)
-target_link_libraries(multi_object_tracker_node ${catkin_LIBRARIES} ${PROTOBUF_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(multi_object_tracker_node ${catkin_LIBRARIES})
 add_dependencies(multi_object_tracker_node ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(visualize_boundingbox_node src/visualize_boundingbox.cpp)
