@@ -1,6 +1,6 @@
 #include "objecttracker.h"
 
-ObjectTracker::ObjectTracker() : distance_threshold_(5), max_missed_count_(8), min_birth_count_(2) {}
+ObjectTracker::ObjectTracker() : distance_threshold_(1), max_missed_count_(2), min_birth_count_(2) {}
 
 void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) { 
     vector<Track> tracks(tracks_);
@@ -129,10 +129,14 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
                     tracks[assignments[i]].Box.velocity_y = all_detections[i].velocity_y;//信赖radar
                     if(!tracks[assignments[i]].lidar_associated){
                         tracks[assignments[i]].Box.z = all_detections[i].z;//激光雷达没匹配到过，信赖radar
-                        tracks[assignments[i]].Box.orientation_angle_w = quaternion_ukf.w();//ukf更新
-                        tracks[assignments[i]].Box.orientation_angle_x = quaternion_ukf.x();//ukf更新
-                        tracks[assignments[i]].Box.orientation_angle_y = quaternion_ukf.y();//ukf更新
-                        tracks[assignments[i]].Box.orientation_angle_z = quaternion_ukf.z();//ukf更新
+                        tracks[assignments[i]].Box.orientation_angle_w = all_detections[i].orientation_angle_w;//信赖radar
+                        tracks[assignments[i]].Box.orientation_angle_x = all_detections[i].orientation_angle_x;//信赖radar
+                        tracks[assignments[i]].Box.orientation_angle_y = all_detections[i].orientation_angle_y;//信赖radar
+                        tracks[assignments[i]].Box.orientation_angle_z = all_detections[i].orientation_angle_z;//信赖radar
+                        //tracks[assignments[i]].Box.orientation_angle_w = quaternion_ukf.w();//ukf更新
+                        //tracks[assignments[i]].Box.orientation_angle_x = quaternion_ukf.x();//ukf更新
+                        //tracks[assignments[i]].Box.orientation_angle_y = quaternion_ukf.y();//ukf更新
+                        //tracks[assignments[i]].Box.orientation_angle_z = quaternion_ukf.z();//ukf更新
                         tracks[assignments[i]].Box.polygon = calculateRadarPolygon(tracks[assignments[i]].Box);//ukf更新计算polygon
                     }
                     tracks[assignments[i]].Box.sensor = BoundingBox3D::RADAR;

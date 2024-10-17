@@ -243,7 +243,7 @@ void fusion::radar_callback (const multi_object_tracker::ObjectList::ConstPtr &r
 
         radar_detection.width = object.width;
         radar_detection.length = object.length;
-        radar_detection.height = (object.width + object.length)/2;
+        radar_detection.height = object.height;
 
         Eigen::Quaterniond global_q;
         Eigen::Quaterniond local_q;

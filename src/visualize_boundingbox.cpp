@@ -16,11 +16,11 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
     for (const auto& object : fusion_objects->prediction_obstacles) {
         visualization_msgs::Marker marker;
         marker.type = visualization_msgs::Marker::LINE_STRIP;
-        marker.header.frame_id = "rslidar";
+        marker.header.frame_id = "ego_vehicle/lidar";
         marker.action = visualization_msgs::Marker::ADD;
         marker.header.stamp = ros::Time::now();
         marker.id = object.perception_obstacle.id;
-        if(object.perception_obstacle.polygon.points.size()>8){//激光雷达
+        if(object.perception_obstacle.polygon.points.size() > 8){//激光雷达
             marker.pose.orientation.w = 1.0;
             marker.pose.orientation.x = 0.0;
             marker.pose.orientation.y = 0.0;
@@ -73,7 +73,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
                 geometry_msgs::Point bottom_point, top_point;
                 bottom_point.x = object.perception_obstacle.polygon.points[i].x;
                 bottom_point.y = object.perception_obstacle.polygon.points[i].y;
-                bottom_point.z = object.perception_obstacle.polygon.points[i].z;
+                bottom_point.z = object.perception_obstacle.polygon.points[i].z - object.perception_obstacle.height/2;
 
                 top_point.x = bottom_point.x;
                 top_point.y = bottom_point.y;
@@ -91,7 +91,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
                 geometry_msgs::Point bottom_point, top_point;
                 bottom_point.x = object.perception_obstacle.polygon.points[i].x;
                 bottom_point.y = object.perception_obstacle.polygon.points[i].y;
-                bottom_point.z = object.perception_obstacle.polygon.points[i].z;
+                bottom_point.z = object.perception_obstacle.polygon.points[i].z - object.perception_obstacle.height/2;
 
                 top_point.x = bottom_point.x;
                 top_point.y = bottom_point.y;
@@ -173,8 +173,8 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
             marker.points.push_back(pos7);
             marker.points.push_back(pos2);
             marker.color.r = 1.0;
-            marker.color.g = 0.6;
-            marker.color.b = 0.2;
+            marker.color.g = 0.1;
+            marker.color.b = 0.7;
 
 
 
@@ -188,7 +188,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
 
         visualization_msgs::Marker id_marker;
         id_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-        id_marker.header.frame_id = "rslidar";
+        id_marker.header.frame_id = "ego_vehicle/lidar";
         id_marker.action = visualization_msgs::Marker::ADD;
         id_marker.header.stamp = ros::Time::now();
         id_marker.id = object.perception_obstacle.id;
@@ -209,7 +209,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
 
         visualization_msgs::Marker trajectory;
         trajectory.type = visualization_msgs::Marker::LINE_STRIP;
-        trajectory.header.frame_id = "rslidar";
+        trajectory.header.frame_id = "ego_vehicle/lidar";
         trajectory.action = visualization_msgs::Marker::ADD;
         trajectory.header.stamp = ros::Time::now();
         trajectory.id = object.perception_obstacle.id;
