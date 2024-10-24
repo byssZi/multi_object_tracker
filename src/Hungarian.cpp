@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <cfloat> // for DBL_MAX
 #include <cmath>  // for fabs()
-#include "Hungarian.h"
+#include "multi_object_tracker/Hungarian.h"
 
 
 HungarianAlgorithm::HungarianAlgorithm(){}

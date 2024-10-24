@@ -1,6 +1,6 @@
-#include "objecttracker.h"
+#include "multi_object_tracker/objecttracker.h"
 
-ObjectTracker::ObjectTracker() : distance_threshold_(1), max_missed_count_(2), min_birth_count_(2) {}
+ObjectTracker::ObjectTracker() : distance_threshold_(5), max_missed_count_(2), min_birth_count_(1) {}
 
 void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) { 
     vector<Track> tracks(tracks_);
@@ -158,46 +158,6 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
         for (size_t i = 0; i < tracks.size(); ++i) {
             if (!track_matched[i]) { //!track_matched[i]表示tracks[i]没匹配上
                 tracks[i].missed_count++;
-/*                 if (tracks[i].missed_count < max_missed_count_) {
-                    switch(tracks[i].Box.sensor)
-                    {
-                        case BoundingBox3D::LIDAR:
-                        {
-                            MeasurementPackage meas_package;
-                            meas_package.sensor_type_ = MeasurementPackage::LASER;
-                            meas_package.raw_measurements_ = VectorXd(2);
-                            meas_package.raw_measurements_ << tracks[i].ukf.x_(0), tracks[i].ukf.x_(1);
-                            auto now = std::chrono::system_clock::now();
-                            auto duration = now.time_since_epoch();
-                            meas_package.timestamp_ = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-                            tracks[i].ukf.ProcessMeasurement(meas_package);
-                            break;
-                        }
-                        case BoundingBox3D::RADAR:
-                        {
-                            MeasurementPackage meas_package;
-                            meas_package.sensor_type_ = MeasurementPackage::RADAR;
-		                    double p_x = tracks[i].ukf.x_(0);
-		                    double p_y = tracks[i].ukf.x_(1);
-		                    double v = tracks[i].ukf.x_(2);
-		                    double yaw = tracks[i].ukf.x_(3);
-                            
-                            double rho = sqrt(p_x*p_x + p_y*p_y);
-                            double phi = atan2(p_y, p_x);
-                            // angle normalization
-                            while (phi > M_PI) phi -= 2.0*M_PI;
-                            while (phi < -M_PI) phi += 2.0*M_PI;
-                            double rho_dot = v*(p_x*cos(yaw) + p_y*sin(yaw))/rho;
-                            meas_package.raw_measurements_ = VectorXd(3);
-                            meas_package.raw_measurements_ << rho, phi, rho_dot;
-                            auto now = std::chrono::system_clock::now();
-                            auto duration = now.time_since_epoch();
-                            meas_package.timestamp_ = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-                            tracks[i].ukf.ProcessMeasurement(meas_package);
-                            break;
-                        }
-                    }
-                } */
             }
         }
     }
