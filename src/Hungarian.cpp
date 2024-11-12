@@ -26,6 +26,7 @@ double HungarianAlgorithm::Solve(vector <vector<double> >& DistMatrix, vector<in
 {
 	unsigned int nRows = DistMatrix.size();
 	unsigned int nCols = DistMatrix[0].size();
+	if (DistMatrix.size() == 0) { return -1; }
 
 	double *distMatrixIn = new double[nRows * nCols];
 	int *assignment = new int[nRows];
@@ -57,132 +58,134 @@ double HungarianAlgorithm::Solve(vector <vector<double> >& DistMatrix, vector<in
 //********************************************************//
 void HungarianAlgorithm::assignmentoptimal(int *assignment, double *cost, double *distMatrixIn, int nOfRows, int nOfColumns)
 {
-	double *distMatrix, *distMatrixTemp, *distMatrixEnd, *columnEnd, value, minValue;
-	bool *coveredColumns, *coveredRows, *starMatrix, *newStarMatrix, *primeMatrix;
-	int nOfElements, minDim, row, col;
+    double *distMatrix, *distMatrixTemp, *distMatrixEnd, *columnEnd, value, minValue;
+    bool *coveredColumns, *coveredRows, *starMatrix, *newStarMatrix, *primeMatrix;
+    int nOfElements, minDim, row, col;
 
-	/* initialization */
-	*cost = 0;
-	for (row = 0; row<nOfRows; row++)
-		assignment[row] = -1;
+    /* initialization */
+    *cost = 0;
+    for (row = 0; row < nOfRows; row++)
+        assignment[row] = -1;
 
-	/* generate working copy of distance Matrix */
-	/* check if all matrix elements are positive */
-	nOfElements = nOfRows * nOfColumns;
-	distMatrix = (double *)malloc(nOfElements * sizeof(double));
-	distMatrixEnd = distMatrix + nOfElements;
+    /* generate working copy of distance Matrix */
+    /* check if all matrix elements are positive */
+    nOfElements = nOfRows * nOfColumns;
 
-	for (row = 0; row<nOfElements; row++)
-	{
-		value = distMatrixIn[row];
-		if (value < 0)
-			cerr << "All matrix elements have to be non-negative." << endl;
-		distMatrix[row] = value;
-	}
+    // Modification 1: Use calloc to initialize distMatrix to zero
+    distMatrix = (double *)calloc(nOfElements, sizeof(double));
+    distMatrixEnd = distMatrix + nOfElements;
 
+    for (row = 0; row < nOfElements; row++)
+    {
+        value = distMatrixIn[row];
+        if (value < 0)
+            cerr << "All matrix elements have to be non-negative." << endl;
+        distMatrix[row] = value;
+    }
 
-	/* memory allocation */
-	coveredColumns = (bool *)calloc(nOfColumns, sizeof(bool));
-	coveredRows = (bool *)calloc(nOfRows, sizeof(bool));
-	starMatrix = (bool *)calloc(nOfElements, sizeof(bool));
-	primeMatrix = (bool *)calloc(nOfElements, sizeof(bool));
-	newStarMatrix = (bool *)calloc(nOfElements, sizeof(bool)); /* used in step4 */
+    /* memory allocation */
+    coveredColumns = (bool *)calloc(nOfColumns, sizeof(bool));
+    coveredRows = (bool *)calloc(nOfRows, sizeof(bool));
+    starMatrix = (bool *)calloc(nOfElements, sizeof(bool));
+    primeMatrix = (bool *)calloc(nOfElements, sizeof(bool));
+    newStarMatrix = (bool *)calloc(nOfElements, sizeof(bool)); /* used in step4 */
 
-	/* preliminary steps */
-	if (nOfRows <= nOfColumns)
-	{
-		minDim = nOfRows;
+    /* preliminary steps */
+    if (nOfRows <= nOfColumns)
+    {
+        minDim = nOfRows;
 
-		for (row = 0; row<nOfRows; row++)
-		{
-			/* find the smallest element in the row */
-			distMatrixTemp = distMatrix + row;
-			minValue = *distMatrixTemp;
-			distMatrixTemp += nOfRows;
-			while (distMatrixTemp < distMatrixEnd)
-			{
-				value = *distMatrixTemp;
-				if (value < minValue)
-					minValue = value;
-				distMatrixTemp += nOfRows;
-			}
+        for (row = 0; row < nOfRows; row++)
+        {
+            /* find the smallest element in the row */
+            distMatrixTemp = distMatrix + row;
+            minValue = *distMatrixTemp;
+            distMatrixTemp += nOfRows;
+            while (distMatrixTemp < distMatrixEnd)
+            {
+                value = *distMatrixTemp;
+                if (value < minValue)
+                    minValue = value;
+                distMatrixTemp += nOfRows;
+            }
 
-			/* subtract the smallest element from each element of the row */
-			distMatrixTemp = distMatrix + row;
-			while (distMatrixTemp < distMatrixEnd)
-			{
-				*distMatrixTemp -= minValue;
-				distMatrixTemp += nOfRows;
-			}
-		}
+            /* subtract the smallest element from each element of the row */
+            distMatrixTemp = distMatrix + row;
+            while (distMatrixTemp < distMatrixEnd)
+            {
+                *distMatrixTemp -= minValue;
+                distMatrixTemp += nOfRows;
+            }
+        }
 
-		/* Steps 1 and 2a */
-		for (row = 0; row<nOfRows; row++)
-			for (col = 0; col<nOfColumns; col++)
-				if (fabs(distMatrix[row + nOfRows*col]) < DBL_EPSILON)
-					if (!coveredColumns[col])
-					{
-						starMatrix[row + nOfRows*col] = true;
-						coveredColumns[col] = true;
-						break;
-					}
-	}
-	else /* if(nOfRows > nOfColumns) */
-	{
-		minDim = nOfColumns;
+        /* Steps 1 and 2a */
+        for (row = 0; row < nOfRows; row++)
+            for (col = 0; col < nOfColumns; col++)
+                if (fabs(distMatrix[row + nOfRows * col]) < DBL_EPSILON)
+                    if (!coveredColumns[col])
+                    {
+                        starMatrix[row + nOfRows * col] = true;
+                        coveredColumns[col] = true;
+                        break;
+                    }
+    }
+    else /* if(nOfRows > nOfColumns) */
+    {
+        minDim = nOfColumns;
 
-		for (col = 0; col<nOfColumns; col++)
-		{
-			/* find the smallest element in the column */
-			distMatrixTemp = distMatrix + nOfRows*col;
-			columnEnd = distMatrixTemp + nOfRows;
+        for (col = 0; col < nOfColumns; col++)
+        {
+            /* find the smallest element in the column */
+            distMatrixTemp = distMatrix + nOfRows * col;
+            columnEnd = distMatrixTemp + nOfRows;
 
-			minValue = *distMatrixTemp++;
-			while (distMatrixTemp < columnEnd)
-			{
-				value = *distMatrixTemp++;
-				if (value < minValue)
-					minValue = value;
-			}
+            // Modification 2: Initialize minValue only if distMatrixTemp is within bounds
+            minValue = *distMatrixTemp++;
+            while (distMatrixTemp < columnEnd)
+            {
+                value = *distMatrixTemp++;
+                if (value < minValue)
+                    minValue = value;
+            }
 
-			/* subtract the smallest element from each element of the column */
-			distMatrixTemp = distMatrix + nOfRows*col;
-			while (distMatrixTemp < columnEnd)
-				*distMatrixTemp++ -= minValue;
-		}
+            /* subtract the smallest element from each element of the column */
+            distMatrixTemp = distMatrix + nOfRows * col;
+            while (distMatrixTemp < columnEnd)
+                *distMatrixTemp++ -= minValue;
+        }
 
-		/* Steps 1 and 2a */
-		for (col = 0; col<nOfColumns; col++)
-			for (row = 0; row<nOfRows; row++)
-				if (fabs(distMatrix[row + nOfRows*col]) < DBL_EPSILON)
-					if (!coveredRows[row])
-					{
-						starMatrix[row + nOfRows*col] = true;
-						coveredColumns[col] = true;
-						coveredRows[row] = true;
-						break;
-					}
-		for (row = 0; row<nOfRows; row++)
-			coveredRows[row] = false;
+        /* Steps 1 and 2a */
+        for (col = 0; col < nOfColumns; col++)
+            for (row = 0; row < nOfRows; row++)
+                if (fabs(distMatrix[row + nOfRows * col]) < DBL_EPSILON)
+                    if (!coveredRows[row])
+                    {
+                        starMatrix[row + nOfRows * col] = true;
+                        coveredColumns[col] = true;
+                        coveredRows[row] = true;
+                        break;
+                    }
+        for (row = 0; row < nOfRows; row++)
+            coveredRows[row] = false;
+    }
 
-	}
+    /* move to step 2b */
+    step2b(assignment, distMatrix, starMatrix, newStarMatrix, primeMatrix, coveredColumns, coveredRows, nOfRows, nOfColumns, minDim);
 
-	/* move to step 2b */
-	step2b(assignment, distMatrix, starMatrix, newStarMatrix, primeMatrix, coveredColumns, coveredRows, nOfRows, nOfColumns, minDim);
+    /* compute cost and remove invalid assignments */
+    computeassignmentcost(assignment, cost, distMatrixIn, nOfRows);
 
-	/* compute cost and remove invalid assignments */
-	computeassignmentcost(assignment, cost, distMatrixIn, nOfRows);
+    /* free allocated memory */
+    free(distMatrix);
+    free(coveredColumns);
+    free(coveredRows);
+    free(starMatrix);
+    free(primeMatrix);
+    free(newStarMatrix);
 
-	/* free allocated memory */
-	free(distMatrix);
-	free(coveredColumns);
-	free(coveredRows);
-	free(starMatrix);
-	free(primeMatrix);
-	free(newStarMatrix);
-
-	return;
+    return;
 }
+
 
 /********************************************************/
 void HungarianAlgorithm::buildassignmentvector(int *assignment, bool *starMatrix, int nOfRows, int nOfColumns)

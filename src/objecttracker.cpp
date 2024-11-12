@@ -1,6 +1,6 @@
 #include "multi_object_tracker/objecttracker.h"
 
-ObjectTracker::ObjectTracker() : distance_threshold_(5), max_missed_count_(2), min_birth_count_(1) {}
+ObjectTracker::ObjectTracker() : distance_threshold_(3), max_missed_count_(4), min_birth_count_(2) {}
 
 void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) { 
     vector<Track> tracks(tracks_);
@@ -178,9 +178,14 @@ void ObjectTracker::AssociateDetectionsToTracks(const vector<BoundingBox3D>& det
 
     for (size_t i = 0; i < num_tracks; ++i) {
         for (size_t j = 0; j < num_detections; ++j) {
-            double dx = tracks[i].Box.x - detections[j].x;
-            double dy = tracks[i].Box.y - detections[j].y;
-            cost_matrix[i][j] = sqrt(dx * dx + dy * dy); // 根据欧几里德距离创建
+            const float dx = tracks[i].Box.x - detections[j].x;
+            const float dy = tracks[i].Box.y - detections[j].y;
+            const float dz = tracks[i].Box.z - detections[j].z;
+            const float dis = sqrt(dx * dx + dy * dy + dz * dz); // 根据欧几里德距离创建
+            const float a_max_dim = std::max(tracks[i].Box.length, std::max(tracks[i].Box.width, tracks[i].Box.height));
+            const float b_max_dim = std::max(detections[j].length, std::max(detections[j].width, detections[j].height));
+            const float ctr_dis = dis / std::min(a_max_dim, b_max_dim);
+            cost_matrix[i][j] = ctr_dis;
         }
     }
 

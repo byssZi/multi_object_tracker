@@ -105,9 +105,9 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
                     marker.points.push_back(top_point);
                 }
             }
-            marker.color.r = 0.3;
-            marker.color.g = 1.0;
-            marker.color.b = 0.6;
+            marker.color.r = 1.0;
+            marker.color.g = 0.4;
+            marker.color.b = 0.5;
 
         } else {
             geometry_msgs::Point pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8;
@@ -175,12 +175,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
             marker.color.r = 1.0;
             marker.color.g = 0.1;
             marker.color.b = 0.7;
-
-
-
         }
-
-
         marker.scale.x = 0.1;
         marker.color.a = 1.0;
         marker.lifetime.fromSec(0.2);
@@ -204,8 +199,6 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
         id_marker.color.b = 1.0;
         id_marker.lifetime.fromSec(0.2);
         id_array.markers.push_back(id_marker);
-
-
 
         visualization_msgs::Marker trajectory;
         trajectory.type = visualization_msgs::Marker::LINE_STRIP;

@@ -62,7 +62,7 @@ public:
 private:
 
     IDManager id_manager_;    
-    double distance_threshold_;
+    const float distance_threshold_;
     int max_missed_count_; // 最大未检测到次数
     int min_birth_count_; // 最小匹配创建次数
     void AssociateDetectionsToTracks(const vector<BoundingBox3D>& detections, vector<int>& assignments,  vector<Track>& tracks);
