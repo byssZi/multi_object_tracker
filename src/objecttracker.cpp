@@ -11,13 +11,12 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
     vector<int> assignments(all_detections.size(), -1);
     if(assignments.empty()) return;
     AssociateDetectionsToTracks(all_detections, assignments, tracks);
-
     std::vector<BoundingBox3D> matched_detections;
     std::vector<BoundingBox3D> unmatched_detections;
     std::vector<Track> unmatched_tracks;
 
     for (size_t i = 0; i < assignments.size(); ++i) {
-        if (assignments[i] >= 0) {
+        if (assignments[i] >= 0 && assignments[i] < track_matched.size()) {
             // 检测结果匹配到跟踪结果
             matched_detections.push_back(all_detections[i]);
             track_matched[assignments[i]] = true; // 对应的track已匹配
@@ -49,7 +48,7 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
     std::cout<< "unmatched_tracks num = "<< unmatched_tracks.size() <<std::endl;
     // 更新跟踪目标
     for (size_t i = 0; i < assignments.size(); ++i) {
-        if (assignments[i] >= 0) { //assignments[i] >= 0 表示对应all_detections[i]匹配上tracks[assignments[i]]
+        if (assignments[i] >= 0 && assignments[i] < tracks.size()) { //assignments[i] >= 0 表示对应all_detections[i]匹配上tracks[assignments[i]]
             switch(all_detections[i].sensor)
             {
                 case BoundingBox3D::LIDAR:
@@ -59,7 +58,7 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
                     meas_package.sensor_type_ = MeasurementPackage::LASER;
                     meas_package.raw_measurements_ = VectorXd(2);
                     meas_package.raw_measurements_ << all_detections[i].x, all_detections[i].y;
-                    auto now = std::chrono::system_clock::now();
+                    auto now = std::chrono::high_resolution_clock::now();
                     auto duration = now.time_since_epoch();
                     meas_package.timestamp_= std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
                     tracks[assignments[i]].ukf.ProcessMeasurement(meas_package);
@@ -108,7 +107,7 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
                     meas_package.sensor_type_ = MeasurementPackage::RADAR;
                     meas_package.raw_measurements_ = VectorXd(3);
                     meas_package.raw_measurements_ << rho, phi, rho_dot;
-                    auto now = std::chrono::system_clock::now();
+                    auto now = std::chrono::high_resolution_clock::now();
                     auto duration = now.time_since_epoch();
                     meas_package.timestamp_= std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
                     tracks[assignments[i]].ukf.ProcessMeasurement(meas_package);
@@ -152,7 +151,6 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
 
     // 创建新的跟踪目标
     CreateNewTracks(unmatched_detections, tracks);
-
     // 更新未匹配到检测结果的跟踪目标
     if(track_matched.size()>0) {
         for (size_t i = 0; i < tracks.size(); ++i) {
@@ -219,7 +217,7 @@ void ObjectTracker::CreateNewTracks(const vector<BoundingBox3D>& unmatched_detec
                 new_track.radar_associated = false;
 
                 MeasurementPackage meas_package;
-                auto now = std::chrono::system_clock::now();
+                auto now = std::chrono::high_resolution_clock::now();
                 auto duration = now.time_since_epoch();
                 meas_package.timestamp_= std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
                 meas_package.sensor_type_ = MeasurementPackage::LASER; // 使用激光雷达进行初始化
@@ -252,7 +250,7 @@ void ObjectTracker::CreateNewTracks(const vector<BoundingBox3D>& unmatched_detec
                 rho_dot = (detection.x * detection.velocity_x + detection.y * detection.velocity_y) / rho;
 
                 MeasurementPackage meas_package;
-                auto now = std::chrono::system_clock::now();
+                auto now = std::chrono::high_resolution_clock::now();
                 auto duration = now.time_since_epoch();
                 meas_package.timestamp_= std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
                 meas_package.sensor_type_ = MeasurementPackage::RADAR; // 使用毫米波雷达进行初始化

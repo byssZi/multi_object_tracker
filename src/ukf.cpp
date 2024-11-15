@@ -15,57 +15,57 @@ UKF::UKF() {
 	
 	// first measurement is used to initialize the UKF
 	is_initialized_ = false;
-	
-  // if this is false, laser measurements will be ignored (except during init)
-  use_laser_ = true;
+		
+	// if this is false, laser measurements will be ignored (except during init)
+	use_laser_ = true;
 
-  // if this is false, radar measurements will be ignored (except during init)
-  use_radar_ = true;
+	// if this is false, radar measurements will be ignored (except during init)
+	use_radar_ = true;
 
-  // initial state vector
-  x_ = VectorXd(5);
+	// initial state vector
+	x_ = VectorXd(5);
 
-  // initial covariance matrix
-  P_ = MatrixXd(5, 5);
+	// initial covariance matrix
+	P_ = MatrixXd(5, 5);
 
-  // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 1.0;
-	
-  // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = M_PI/6.0;
+	// Process noise standard deviation longitudinal acceleration in m/s^2
+	std_a_ = 1.0;
+		
+	// Process noise standard deviation yaw acceleration in rad/s^2
+	std_yawdd_ = M_PI/6.0;
 
-  // Laser measurement noise standard deviation position1 in m
-  std_laspx_ = 0.15;
+	// Laser measurement noise standard deviation position1 in m
+	std_laspx_ = 0.15;
 
-  // Laser measurement noise standard deviation position2 in m
-  std_laspy_ = 0.15;
+	// Laser measurement noise standard deviation position2 in m
+	std_laspy_ = 0.15;
 
-  // Radar measurement noise standard deviation radius in m
-  std_radr_ = 0.3;
+	// Radar measurement noise standard deviation radius in m
+	std_radr_ = 0.3;
 
-  // Radar measurement noise standard deviation angle in rad
-  std_radphi_ = 0.03;
+	// Radar measurement noise standard deviation angle in rad
+	std_radphi_ = 0.03;
 
-  // Radar measurement noise standard deviation radius change in m/s
-  std_radrd_ = 0.3;
+	// Radar measurement noise standard deviation radius change in m/s
+	std_radrd_ = 0.3;
 
 	// dimension of state vector
 	n_x_ = 5;
-	
+		
 	// dimention of augmented state vector
 	n_aug_ = 7;
-	
+		
 	// spreading parameter
 	lambda_ = 3 - n_aug_;
-	
+		
 	// state vector
 	x_ = VectorXd(n_x_);
 	x_.fill(0.0);
-	
+		
 	// state covariance matrix
 	P_ = MatrixXd(n_x_, n_x_);
 	P_.fill(0.0);
-	
+		
 	// weights vector for sigma points
 	weights_ = VectorXd(2*n_aug_+1);
 	weights_(0) = lambda_/(lambda_+n_aug_);
@@ -73,14 +73,14 @@ UKF::UKF() {
 	for (int i = 1; i < 2*n_aug_+1; ++i) {
 		weights_(i) = w;
 	}
-	
-  /**
-  TODO:
+		
+	/**
+	 TODO:
 
-  Complete the initialization. See ukf.h for other member properties.
+	Complete the initialization. See ukf.h for other member properties.
 
-  Hint: one or more values initialized above might be wildly off...
-  */
+	Hint: one or more values initialized above might be wildly off...
+	*/
 }
 
 UKF::~UKF() {}
@@ -156,7 +156,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	 ****************************************************************************/
 	
 	// compute the time elapsed between the current and previous measurements in seconds
-	double dt = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
+	double dt = abs(meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
 	previous_timestamp_ = meas_package.timestamp_;
 	
 	Prediction(dt);
@@ -264,8 +264,12 @@ void UKF::Prediction(double delta_t) {
 	for (int i = 0; i < 2*n_aug_+1; ++i) {
 		VectorXd x_diff = Xsig_pred_.col(i) - x_;
 		// angle normalization
-		while (x_diff(3) > M_PI) x_diff(3) -= 2.0*M_PI;
-		while (x_diff(3) < -M_PI) x_diff(3) += 2.0*M_PI;
+		x_diff(3) = fmod(x_diff(3), 2.0 * M_PI);
+		if (x_diff(3) > M_PI) {
+			x_diff(3) -= 2.0 * M_PI;
+		} else if (x_diff(3) < -M_PI) {
+			x_diff(3) += 2.0 * M_PI;
+		}
 		P_ += weights_(i) * x_diff * x_diff.transpose();
 	}
 }
@@ -323,8 +327,12 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	for (int i = 0; i < 2*n_aug_+1; ++i) {
 		VectorXd x_diff = Xsig_pred_.col(i) - x_;
 		// angle normalization
-		while (x_diff(3) > M_PI) x_diff(3) -= 2.*M_PI;
-		while (x_diff(3) < -M_PI) x_diff(3) += 2.*M_PI;
+		x_diff(3) = fmod(x_diff(3), 2.0 * M_PI);
+		if (x_diff(3) > M_PI) {
+			x_diff(3) -= 2.0 * M_PI;
+		} else if (x_diff(3) < -M_PI) {
+			x_diff(3) += 2.0 * M_PI;
+		}
 		
 		VectorXd z_diff = Zsig.col(i) - z_pred;
 		
@@ -347,8 +355,12 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	// update state vector and covariance matrix
 	x_ += K*z_k1_diff;
 	// angle normalization
-	while (x_(3) > M_PI) x_(3) -= 2.*M_PI;
-	while (x_(3) < -M_PI) x_(3) += 2.*M_PI;
+	x_(3) = fmod(x_(3), 2.0 * M_PI);
+	if (x_(3) > M_PI) {
+		x_(3) -= 2.0 * M_PI;
+	} else if (x_(3) < -M_PI) {
+		x_(3) += 2.0 * M_PI;
+	}
 	P_ -= K*S*K.transpose();
 }
 
@@ -382,8 +394,12 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 		double rho = sqrt(p_x*p_x + p_y*p_y);
 		double phi = atan2(p_y, p_x);
 		// angle normalization
-		while (phi > M_PI) phi -= 2.0*M_PI;
-		while (phi < -M_PI) phi += 2.0*M_PI;
+		phi = fmod(phi, 2.0 * M_PI);
+		if (phi > M_PI) {
+			phi -= 2.0 * M_PI;
+		} else if (phi < -M_PI) {
+			phi += 2.0 * M_PI;
+		}
 		double rho_dot = v*(p_x*cos(yaw) + p_y*sin(yaw))/rho;
 		
 		Zsig.col(i) << rho, phi, rho_dot;
@@ -401,8 +417,12 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	S.fill(0.0);
 	for (int i = 0; i < 2*n_aug_+1; ++i) {
 		VectorXd z_diff = Zsig.col(i) - z_pred;
-		while (z_diff(1) > M_PI) z_diff(1) -= 2.*M_PI;
-		while (z_diff(1) < -M_PI) z_diff(1) += 2.*M_PI;
+		z_diff(1) = fmod(z_diff(1), 2.0 * M_PI);
+		if (z_diff(1) > M_PI) {
+			z_diff(1) -= 2.0 * M_PI;
+		} else if (z_diff(1) < -M_PI) {
+			z_diff(1) += 2.0 * M_PI;
+		}
 		S += weights_(i) * z_diff * z_diff.transpose();
 	}
 	
@@ -419,12 +439,20 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	Tc.fill(0.0);
 	for (int i = 0; i < 2*n_aug_+1; ++i) {
 		VectorXd x_diff = Xsig_pred_.col(i) - x_;
-		while (x_diff(3)> M_PI) x_diff(3)-=2.*M_PI;
-		while (x_diff(3)<-M_PI) x_diff(3)+=2.*M_PI;
+		x_diff(3) = fmod(x_diff(3), 2.0 * M_PI);
+		if (x_diff(3) > M_PI) {
+			x_diff(3) -= 2.0 * M_PI;
+		} else if (x_diff(3) < -M_PI) {
+			x_diff(3) += 2.0 * M_PI;
+		}
 		
 		VectorXd z_diff = Zsig.col(i) - z_pred;
-		while (z_diff(1)> M_PI) z_diff(1)-=2.*M_PI;
-		while (z_diff(1)<-M_PI) z_diff(1)+=2.*M_PI;
+		z_diff(1) = fmod(z_diff(1), 2.0 * M_PI);
+		if (z_diff(1) > M_PI) {
+			z_diff(1) -= 2.0 * M_PI;
+		} else if (z_diff(1) < -M_PI) {
+			z_diff(1) += 2.0 * M_PI;
+		}
 		
 		Tc += weights_(i)*x_diff*z_diff.transpose();
 	}
@@ -439,8 +467,12 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 					meas_package.raw_measurements_[1], // measured phi
 					meas_package.raw_measurements_[2]; // measured phi dot
 	VectorXd z_k1_diff = z_k1 - z_pred;
-	while (z_k1_diff(1) > M_PI) z_k1_diff(1) -= 2.*M_PI;
-	while (z_k1_diff(1) < -M_PI) z_k1_diff(1) += 2.*M_PI;
+	z_k1_diff(1) = fmod(z_k1_diff(1), 2.0 * M_PI);
+	if (z_k1_diff(1) > M_PI) {
+		z_k1_diff(1) -= 2.0 * M_PI;
+	} else if (z_k1_diff(1) < -M_PI) {
+		z_k1_diff(1) += 2.0 * M_PI;
+	}
 	
 	// calculate NIS value
 	NIS_ = z_k1_diff.transpose() * Sinv * z_k1_diff;
@@ -448,7 +480,11 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	// update state vector and covariance matrix
 	x_ += K*z_k1_diff;
 	// angle normalization
-	while (x_(3) > M_PI) x_(3) -= 2.*M_PI;
-	while (x_(3) < -M_PI) x_(3) += 2.*M_PI;
+	x_(3) = fmod(x_(3), 2.0 * M_PI);
+	if (x_(3) > M_PI) {
+		x_(3) -= 2.0 * M_PI;
+	} else if (x_(3) < -M_PI) {
+		x_(3) += 2.0 * M_PI;
+	}
 	P_ -= K*S*K.transpose();
 }
