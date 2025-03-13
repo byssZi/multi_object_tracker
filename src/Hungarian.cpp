@@ -24,6 +24,20 @@ HungarianAlgorithm::~HungarianAlgorithm(){}
 //********************************************************//
 double HungarianAlgorithm::Solve(vector <vector<double> >& DistMatrix, vector<int>& Assignment)
 {
+	// 检查矩阵中是否存在 inf 或 nan 值
+	bool has_invalid_value = false;
+	for (const auto& row : DistMatrix) {
+		for (const auto& value : row) {
+			if (std::isinf(value) || std::isnan(value)) {
+				has_invalid_value = true;
+			}
+		}
+	}
+
+	if (has_invalid_value) {
+		std::cout << "Cost matrix contains inf or nan values. Exiting." << std::endl;
+		return -1; // 或者根据你的需求返回其他值
+	}
 	unsigned int nRows = DistMatrix.size();
 	unsigned int nCols = DistMatrix[0].size();
 	if (DistMatrix.size() == 0) { return -1; }

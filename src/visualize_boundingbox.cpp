@@ -16,7 +16,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
     for (const auto& object : fusion_objects->prediction_obstacles) {
         visualization_msgs::Marker marker;
         marker.type = visualization_msgs::Marker::LINE_STRIP;
-        marker.header.frame_id = "ego_vehicle/lidar";
+        marker.header.frame_id = "radar_link";
         marker.action = visualization_msgs::Marker::ADD;
         marker.header.stamp = ros::Time::now();
         marker.id = object.perception_obstacle.id;
@@ -183,7 +183,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
 
         visualization_msgs::Marker id_marker;
         id_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-        id_marker.header.frame_id = "ego_vehicle/lidar";
+        id_marker.header.frame_id = "radar_link";
         id_marker.action = visualization_msgs::Marker::ADD;
         id_marker.header.stamp = ros::Time::now();
         id_marker.id = object.perception_obstacle.id;
@@ -202,7 +202,7 @@ void BoundingBoxVisualizer::fusion_callback(const multi_object_tracker::Predicti
 
         visualization_msgs::Marker trajectory;
         trajectory.type = visualization_msgs::Marker::LINE_STRIP;
-        trajectory.header.frame_id = "ego_vehicle/lidar";
+        trajectory.header.frame_id = "radar_link";
         trajectory.action = visualization_msgs::Marker::ADD;
         trajectory.header.stamp = ros::Time::now();
         trajectory.id = object.perception_obstacle.id;

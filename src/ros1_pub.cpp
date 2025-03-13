@@ -24,7 +24,7 @@ fusion::~fusion() {
 
 void fusion::run(){
     lidar_sub = nh_.subscribe("/autoware_tracker/cluster/objects", 1, &fusion::lidar_callback, this);
-    radar_sub = nh_.subscribe("/ars_40X/combined_objects", 1, &fusion::radar_callback, this);
+    radar_sub = nh_.subscribe("/radar/dbscan_bbox", 1, &fusion::radar_callback, this);
     odom_sub = nh_.subscribe("/odomData", 1, &fusion::odom_callback, this);
     timer_ = nh_.createTimer(ros::Duration(0.1), &fusion::timerCallback, this);
     fusion_pub = nh_.advertise<multi_object_tracker::PredictionObstacles>("/MultiObjectTracker",1);

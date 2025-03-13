@@ -1,6 +1,6 @@
 #include "multi_object_tracker/objecttracker.h"
 
-ObjectTracker::ObjectTracker() : distance_threshold_(3), max_missed_count_(4), min_birth_count_(2) {}
+ObjectTracker::ObjectTracker() : distance_threshold_(1), max_missed_count_(4), min_birth_count_(2) {}
 
 void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) { 
     vector<Track> tracks(tracks_);
@@ -99,9 +99,6 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
                     rho = sqrt(all_detections[i].x * all_detections[i].x + all_detections[i].y * all_detections[i].y);
                     phi = atan2(all_detections[i].y, all_detections[i].x);
                     rho_dot = (all_detections[i].x * all_detections[i].velocity_x + all_detections[i].y * all_detections[i].velocity_y) / rho;
-                    // angle normalization
-                    while (phi > M_PI) phi -= 2.0*M_PI;
-                    while (phi < -M_PI) phi += 2.0*M_PI;
                     // 更新已存在的跟踪目标
                     MeasurementPackage meas_package;
                     meas_package.sensor_type_ = MeasurementPackage::RADAR;
@@ -132,10 +129,10 @@ void ObjectTracker::ProcessMeasurement(const vector<BoundingBox3D>& detections) 
                         tracks[assignments[i]].Box.orientation_angle_x = all_detections[i].orientation_angle_x;//信赖radar
                         tracks[assignments[i]].Box.orientation_angle_y = all_detections[i].orientation_angle_y;//信赖radar
                         tracks[assignments[i]].Box.orientation_angle_z = all_detections[i].orientation_angle_z;//信赖radar
-                        //tracks[assignments[i]].Box.orientation_angle_w = quaternion_ukf.w();//ukf更新
-                        //tracks[assignments[i]].Box.orientation_angle_x = quaternion_ukf.x();//ukf更新
-                        //tracks[assignments[i]].Box.orientation_angle_y = quaternion_ukf.y();//ukf更新
-                        //tracks[assignments[i]].Box.orientation_angle_z = quaternion_ukf.z();//ukf更新
+                        tracks[assignments[i]].Box.length = all_detections[i].length;//信赖radar
+                        tracks[assignments[i]].Box.width = all_detections[i].width;//信赖radar
+                        tracks[assignments[i]].Box.height = all_detections[i].height;//信赖radar
+                        tracks[assignments[i]].Box.label = all_detections[i].label;//信赖radar
                         tracks[assignments[i]].Box.polygon = calculateRadarPolygon(tracks[assignments[i]].Box);//ukf更新计算polygon
                     }
                     tracks[assignments[i]].Box.sensor = BoundingBox3D::RADAR;
@@ -244,9 +241,6 @@ void ObjectTracker::CreateNewTracks(const vector<BoundingBox3D>& unmatched_detec
                 double rho, phi, rho_dot;
                 rho = sqrt(detection.x * detection.x + detection.y * detection.y);
                 phi = atan2(detection.y, detection.x);
-                // angle normalization
-                while (phi > M_PI) phi -= 2.0*M_PI;
-                while (phi < -M_PI) phi += 2.0*M_PI;
                 rho_dot = (detection.x * detection.velocity_x + detection.y * detection.velocity_y) / rho;
 
                 MeasurementPackage meas_package;
